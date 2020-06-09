@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "View Album";
+}
+
+    <ol>
+        @for (int i = ViewBag.start; i < ViewBag.tracks.Length && ViewBag.tracks[i].album.id == ViewBag.albumID; i++)
+        {
+            <div class="row">
+                <div class="col-md-4">
+                    <li>Track: @ViewBag.tracks[i].title<br />
+                    Rank: @ViewBag.tracks[i].rank
+                    </li>
+                </div>
+                <div class="col-md-6">
+                    <audio controls>
+                        <source src="@ViewBag.tracks[i].preview" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <div class="col-md-2">
+                    @if (null == @User.Identity.Name)
+                    {
+                    <p>You must login to save favorites</p>
+                    }
+                    else
+                    {// public IActionResult ShowFavorites(int id, string title, string ArtistName, string album, string preview)
+                        <form action="/Music/ShowFavorites" method="post">
+                            <input type=hidden name="id" value="@ViewBag.tracks[i].id" />
+                            <input type=hidden name="title" value="@ViewBag.tracks[i].title" />
+                            <input type=hidden name="ArtistName" value="@ViewBag.tracks[i].artist.name" />
+                            <input type="hidden" name="album" value="@ViewBag.tracks[i].album.cover_small" />
+                            <input type="hidden" name="preview" value="@ViewBag.tracks[i].preview" />
+                            <button type="submit">Save To Favorites</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </ol>

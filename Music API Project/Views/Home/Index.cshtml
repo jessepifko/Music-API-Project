@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome To The Music Database</h1>
+    <p>Enter your search criteria below
+
+    <form action="/Music/Index" method="POST">
+        <input type="text" size="40" name="queryString" placeholder="Enter an artist, album or song title."/>
+        <input type="submit" />
+    </form>
+</div>

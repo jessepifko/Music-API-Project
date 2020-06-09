@@ -1,0 +1,51 @@
+﻿@model SearchResults
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Search Results</h1>
+
+@if (Model == null)
+{
+    <p>No results found.</p>
+}
+
+<div class="container">
+
+    @for (int i = 0; i < Model.data.Length; i++)
+    {
+        string artistId = Model.data[i].artist.id.ToString();
+        string artistName = Model.data[i].artist.name;
+        int albumId = Model.data[i].album.id;
+        Music_API_Project.Models.AlbumModel.Album curAlbum = new Music_API_Project.Models.AlbumModel.Album();
+
+        @if (i == 0 || @Model.data[i].album.id != @Model.data[i - 1].album.id)
+        {
+            ViewBag.tracks = @Model.data;
+            ViewBag.albumID = @Model.data[i].album.id;
+            ViewBag.start = i;
+
+            <hr />
+
+            <div class="row">
+                <div class="col-md-3">
+                    <a href="@Url.Action("ViewAlbum", "Music", new {albumID = @albumId})">
+                        <img src="@Model.data[i].album.cover_medium" />
+                    </a><br />
+                    Album: <a href="@Url.Action("ViewAlbum", "Music", new {albumID = @albumId})">
+                        @Model.data[i].album.title
+                    </a><br />
+                    Artist: <a href="@Url.Action("ArtistDetails", "Music", new {artistID = @artistId})">
+                        @Model.data[i].artist.name
+                    </a>
+                </div>
+                <div class="col-md-9">
+                    @Html.Partial("ListSearchAlbumTracks")
+                </div>
+            </div><!-- end row-->
+        }
+
+    }<!-- end for -->
+
+</div><!-- end container -->

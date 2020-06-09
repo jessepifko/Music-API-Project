@@ -1,0 +1,259 @@
+﻿@model ArtistDetailsVM
+
+
+<link href="~/css/site.css" rel="stylesheet" />
+<link href="~/css/artistDetailsSheet.css" rel="stylesheet" />
+
+<div class="">
+
+    @*This is the title of the Artist Page*@
+    <div class="flexContainer">
+        <h1> @Model.artist.name</h1>
+    </div>
+
+    <hr class="hrRules" />
+    <br />
+
+    @*This is the image of the Artist that is displayed once *@
+    <div class="flexContainer">
+        <picture>
+            <source srcset="@Model.artist.picture_small" media="(max-width: 300px)">
+            <source srcset="@Model.artist.picture_medium" media="(max-width: 1000px)">
+            <source srcset="@Model.artist.picture_big" media="(max-width: 1400px)">
+            <img src=@Model.artist.picture_big />
+        </picture>
+    </div>
+
+    <br />
+    <br />
+
+    @*This is the Header for ALbums on the Artist Page*@
+    <div class="flexContainer">
+        <button class="artistButton" data-toggle="collapse" data-target="#albumList">
+            <h5>Show @Model.artist.name's Albums </h5>
+        </button>
+    </div>
+
+    <br />
+
+    @*This is the container for the button click that shows all of the artist's albums*@
+    <div id="albumList" class="collapse">
+        <table class="tableStyles" style="width:100%">
+            <tr class="TrackRows">
+                <th>AlbumID</th>
+                <th>Album Title</th>
+                <th>Album Cover</th>
+            </tr>
+
+            @{
+                List<int> ablumIDList = new List<int>();
+
+
+                @foreach (DatumFromTrack song in Model.trackList.data)
+                {
+
+                    int albumId = @song.album.id;
+
+                    if (!ablumIDList.Contains(albumId))
+                    {
+                        ablumIDList.Add(albumId);
+
+                        <tr>
+
+                            <td>@song.album.id</td>
+
+                            <td>
+                                <a href="@Url.Action("ViewAlbum", "Music", new { albumID = @albumId })">
+                                    @song.album.title
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="@Url.Action("ViewAlbum", "Music", new { albumID = @albumId })">
+                                    <img src=@song.album.cover_small />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+
+        </table>
+    </div>
+
+    <br />
+    <br />
+
+    <div class="flexContainer">
+        <h3>
+            @Model.artist.name's Top Tracks
+        </h3>
+    </div>
+
+    <hr class="hrRules1" />
+    <hr class="hrRules2" />
+    <hr class="hrRules3" />
+    <hr class="hrRules4" />
+
+    <div class="flexTableStyle" style="overflow-x:auto" ;>
+        <table class="tableStyles" style="width:100%">
+            <tr class="TrackRows">
+                <th class="hiddenTabs">Song Rank</th>
+                <th>Track Title</th>
+                <th>Album</th>
+                <th class="hiddenTabs">Track Length (seconds)</th>
+                <th class="hiddenTabs">Preview</th>
+                <th>Add To Favorites</th>
+            </tr>
+
+            @{
+                int trackNum1 = 1;
+
+                List<DatumFromTrack> songRankList = new List<DatumFromTrack>();
+
+                @foreach (DatumFromTrack song in Model.trackList.data)
+                {
+                    songRankList.Add(song);
+                }
+
+                List<DatumFromTrack> sortedSongList = songRankList.OrderBy(x => x.rank).ToList();
+
+                sortedSongList.Reverse();
+
+                @foreach (DatumFromTrack song in sortedSongList)
+                {
+                    int albumId = @song.album.id;
+
+                    int songRank = song.rank;
+
+                    if (trackNum1 <= 10)
+                    {
+                        <tr>
+                            <td class="hiddenTabs">@song.rank</td>
+
+                            <td>@song.title_short</td>
+
+                            <td>
+                                <a href="@Url.Action("ViewAlbum", "Music", new { albumID = @albumId })">
+                                    @song.album.title
+                                </a>
+                            </td>
+
+                            <td class="hiddenTabs">@song.duration</td>
+
+                            <td class="hiddenTabs">
+                                <audio controls>
+                                    <source src="@song.preview" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+
+                            <td>
+                                @if (null == @User.Identity.Name)
+                                {
+                                    <p>Login To Save To Favorites</p>
+                                }
+                                else
+                                {
+                                    <form action="/Music/ShowFavorites" method="post">
+                                        <input type=hidden name="id" value="@song.id" />
+                                        <input type=hidden name="title" value="@song.title_short" />
+                                        <input type=hidden name="ArtistName" value="@Model.artist.name" />
+                                        <input type="hidden" name="album" value="@song.album.cover_small" />
+                                        <input type="hidden" name="preview" value="@song.preview" />
+                                        <button class="artistButton" type="submit">Save To Favorites</button>
+                                    </form>
+                                }
+                            </td>
+
+                        </tr>
+                    }
+                    trackNum1++;
+                }
+            }
+        </table>
+
+
+    </div>
+
+    @*----------------------------------------------------------------------------------------------------------------------------------------------------------------*@
+
+    <br />
+    @if (trackNum1 > 10)
+    {
+
+        <div class="flexContainer">
+            <button class="artistButton" data-toggle="collapse" data-target="#fullSongList">
+                <h5>Show More Songs</h5>
+            </button>
+        </div>
+
+    }
+
+    <br />
+
+    <div id="fullSongList" class="collapse">
+        <div class="flexTableStyle" style="overflow-x:auto" ;>
+            <table class="tableStyles" style="width:100%">
+
+                @{
+
+                    int trackNum2 = 1;
+
+                    @foreach (DatumFromTrack song in sortedSongList)
+                    {
+                        int albumId = @song.album.id;
+
+                        if (trackNum2 >= 11)
+                        {
+                            <tr>
+                                <td class="hiddenTabs">@song.rank</td>
+
+                                <td>@song.title_short</td>
+
+                                <td>
+                                    <a href="@Url.Action("ViewAlbum", "Music", new { albumID = @albumId })">
+                                        @song.album.title
+                                    </a>
+                                </td>
+
+                                <td class="hiddenTabs">@song.duration</td>
+
+                                <td class="hiddenTabs">
+                                    <audio controls>
+                                        <source src="@song.preview" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </td>
+
+                                <td>
+                                    @if (null == @User.Identity.Name)
+                                    {
+                                        <p>Login To Save To Favorites</p>
+                                    }
+                                    else
+                                    {
+                                        <form action="/Music/ShowFavorites" method="post">
+                                            <input type=hidden name="id" value="@song.id" />
+                                            <input type=hidden name="title" value="@song.title_short" />
+                                            <input type=hidden name="ArtistName" value="@Model.artist.name" />
+                                            <input type="hidden" name="album" value="@song.album.cover_small" />
+                                            <input type="hidden" name="preview" value="@song.preview" />
+                                            <button class="artistButton" type="submit">Save To Favorites</button>
+                                        </form>
+                                    }
+                                </td>
+
+                            </tr>
+                        }
+                        trackNum2++;
+                    }
+                }
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+@*<p>@Model.link</p>*@

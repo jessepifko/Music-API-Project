@@ -1,0 +1,56 @@
+﻿@model Music_API_Project.Models.AlbumModel.Album
+
+@{
+    ViewData["Title"] = "View Album";
+}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-lg-3">
+            <img src="@Model.cover_medium" />
+            <h6>Album @Model.title</h6>
+            <a href="@Url.Action("ArtistDetails", "Music", new {artistID = Model.artist.id})">
+                <h6>Artist @Model.artist.name</h6>
+            </a>
+        </div>
+        <div class="col-lg-9">
+
+            <ol>
+                @foreach (var t in Model.tracks.data)
+                {
+                    <div class="row">
+                        <div class="col-md-4">
+                            <li>Track: @t.title<br />
+                            Rank: @t.rank
+                            </li>
+                        </div>
+                        <div class="col-md-6">
+                            <audio controls>
+                                <source id="@(t.id)preview" src="@t.preview" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                        <div class="col-md-2">
+                            @if (null == @User.Identity.Name)
+                            {
+                                <p>You must login to save favorites</p>
+                            }
+                            else
+                            {// public IActionResult ShowFavorites(int id, string title, string ArtistName, string album, string preview)
+                                <form action="/Music/ShowFavorites" method="post">
+                                    <input type=hidden name="id" value="@t.id" />
+                                    <input type=hidden name="title" value="@t.title" />
+                                    <input type=hidden name="ArtistName" value="@Model.artist.name" />
+                                    <input type="hidden" name="album" value="@Model.cover_small" />
+                                    <input type="hidden" name="preview" value="@t.preview" />
+                                    <button type="submit">Save To Favorites</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </ol>
+        </div>
+    </div><!-- row-->
+</div><!-- container -->
